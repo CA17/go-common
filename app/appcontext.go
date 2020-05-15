@@ -115,23 +115,23 @@ func NewCrudQuery(table string, culumns []string, resultRef interface{}) *CrudQu
 
 type CrudAdd struct {
 	Table string
-	vals  []map[string]interface{}
+	Vals  []map[string]interface{}
 }
 
 func NewCrudAdd(table string, vals []map[string]interface{}) *CrudAdd {
-	return &CrudAdd{Table: table, vals: vals}
+	return &CrudAdd{Table: table, Vals: vals}
 }
 
 type CrudUpdate struct {
 	Table  string
-	vals   map[string]interface{}
+	Vals   map[string]interface{}
 	Eq     sq.Eq
 	LtOrEq sq.LtOrEq
 	GtOrEq sq.GtOrEq
 }
 
 func NewCrudUpdate(table string, vals map[string]interface{}, filter map[string]interface{}) *CrudUpdate {
-	return &CrudUpdate{Table: table, vals: vals, Eq: filter}
+	return &CrudUpdate{Table: table, Vals: vals, Eq: filter}
 }
 
 // CRUD 获取单个对象
@@ -248,7 +248,7 @@ func (m *AppContext) DBAdd(ca *CrudAdd) error {
 		return err
 	}
 
-	for _, valmap := range ca.vals {
+	for _, valmap := range ca.Vals {
 		var cols []string
 		var values []interface{}
 
@@ -284,7 +284,7 @@ func (m *AppContext) DBAdd(ca *CrudAdd) error {
 
 // CRUD 数据更新
 func (m *AppContext) DBUpdate(cu *CrudUpdate) error {
-	b := sq.Update(cu.Table).SetMap(cu.vals)
+	b := sq.Update(cu.Table).SetMap(cu.Vals)
 	if cu.Eq != nil {
 		b = b.Where(cu.Eq)
 	}
