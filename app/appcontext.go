@@ -29,7 +29,7 @@ func GetDatabase(config *conf.DBConfig) *sqlx.DB {
 
 type ContextManager interface {
 	DBPool() *sqlx.DB
-	Get(key string) interface{}
+	Get(key string) (interface{}, error)
 	Set(key string, val interface{})
 }
 
