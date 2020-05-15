@@ -7,9 +7,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 
+	"github.com/ca17/go-common/common"
 	"github.com/ca17/go-common/conf"
 	"github.com/ca17/go-common/log"
-	"github.com/ca17/go-common/common"
 )
 
 // 获取数据库连接，执行一次
