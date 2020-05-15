@@ -236,3 +236,20 @@ func CopyFile(dstName, srcName string, perm os.FileMode) (written int64, err err
 
 	return io.Copy(dst, src)
 }
+
+
+
+func IfNA(src string, defval string) string {
+	if src == "N/A" || src == ""{
+		return defval
+	}
+	return src
+}
+
+
+func EmptyToNA(src string) string {
+	if src == "" {
+		return "N/A"
+	}
+	return src
+}
