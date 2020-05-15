@@ -9,7 +9,7 @@ import (
 
 	"github.com/ca17/go-common/conf"
 	"github.com/ca17/go-common/log"
-	"github.com/ca17/go-common/utils"
+	"github.com/ca17/go-common/common"
 )
 
 // 获取数据库连接，执行一次
@@ -21,7 +21,7 @@ func GetDatabase(config *conf.DBConfig) *sqlx.DB {
 		config.Port,
 		config.Name)
 	pool, err := sqlx.Open("mysql", dsn)
-	utils.Must(err)
+	common.Must(err)
 	pool.SetMaxOpenConns(config.MaxConn)
 	pool.SetMaxIdleConns(config.MaxIdle)
 	return pool
@@ -69,7 +69,7 @@ type PageResult struct {
 var EmptyPageResult = &PageResult{
 	TotalCount: 0,
 	Pos:        0,
-	Data:       utils.EmptyList,
+	Data:       common.EmptyList,
 }
 
 // CRUD 定义

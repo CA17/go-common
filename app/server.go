@@ -10,7 +10,7 @@ import (
 
 	"github.com/ca17/go-common/conf"
 	"github.com/ca17/go-common/log"
-	"github.com/ca17/go-common/utils"
+	"github.com/ca17/go-common/common"
 )
 
 func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...WebHandler) error {
@@ -33,7 +33,7 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 		SigningKey: []byte(webcfg.Secret),
 		Skipper: func(c echo.Context) bool {
 			skips := strings.Split(webcfg.AuthSkip, ",")
-			if utils.InSlice(c.Request().RequestURI, skips) {
+			if common.InSlice(c.Request().RequestURI, skips) {
 				return true
 			}
 			return false

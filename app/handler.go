@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/ca17/go-common/conf"
-	"github.com/ca17/go-common/utils"
+	"github.com/ca17/go-common/common"
 )
 
 type RestResult struct {
@@ -120,7 +120,7 @@ func (h *HttpHandler) FetchExcelData(c echo.Context, sheet string) ([]map[string
 			if i == 0 {
 				head[k] = colCell
 			} else {
-				item[utils.ToCamelCase(head[k])] = colCell
+				item[common.ToCamelCase(head[k])] = colCell
 			}
 		}
 		if i == 0 {
