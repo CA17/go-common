@@ -9,7 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	zh_translations "github.com/go-playground/validator/v10/translations/zh"
 
-	"github.com/ca17/go-common"
+	"github.com/ca17/go-common/utils"
 )
 
 const (
@@ -81,7 +81,7 @@ func NewValidatorTrans() (*validator.Validate, *ut.Translator, error) {
 func init() {
 	var err error
 	Validtool, ValidTrans, err = NewValidatorTrans()
-	common.Must(err)
+	utils.Must(err)
 }
 
 func regexpCompile(str string) *regexp.Regexp {

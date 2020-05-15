@@ -1,4 +1,4 @@
-package common
+package utils
 
 import (
 	"crypto/rand"
@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	mrand "math/rand"
 	"os"
 	"reflect"
@@ -16,13 +17,10 @@ import (
 	"time"
 
 	"github.com/bwmarrin/snowflake"
-
-	"github.com/ca17/go-common/gtypes"
-	"github.com/ca17/go-common/log"
 )
 
 var (
-	EmptyList = gtypes.IList{}
+	EmptyList = new([]interface{})
 )
 
 // print usage
@@ -36,7 +34,7 @@ func MakeDir(path string) {
 	f, err := os.Stat(path)
 	if err != nil || f.IsDir() == false {
 		if err := os.Mkdir(path, os.ModePerm); err != nil {
-			log.Error("create dir fail！", err)
+			log.Fatalf("create dir fail！", err)
 			return
 		}
 	}

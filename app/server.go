@@ -8,9 +8,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/ca17/go-common"
 	"github.com/ca17/go-common/conf"
 	"github.com/ca17/go-common/log"
+	"github.com/ca17/go-common/utils"
 )
 
 func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...WebHandler) error {
@@ -33,7 +33,7 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 		SigningKey: []byte(webcfg.Secret),
 		Skipper: func(c echo.Context) bool {
 			skips := strings.Split(webcfg.AuthSkip, ",")
-			if common.InSlice(c.Request().RequestURI, skips) {
+			if utils.InSlice(c.Request().RequestURI, skips) {
 				return true
 			}
 			return false

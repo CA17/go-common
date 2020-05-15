@@ -8,8 +8,8 @@ import (
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/labstack/echo/v4"
 
-	"github.com/ca17/go-common"
 	"github.com/ca17/go-common/conf"
+	"github.com/ca17/go-common/utils"
 )
 
 type RestResult struct {
@@ -120,7 +120,7 @@ func (h *HttpHandler) FetchExcelData(c echo.Context, sheet string) ([]map[string
 			if i == 0 {
 				head[k] = colCell
 			} else {
-				item[common.ToCamelCase(head[k])] = colCell
+				item[utils.ToCamelCase(head[k])] = colCell
 			}
 		}
 		if i == 0 {
