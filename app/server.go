@@ -32,6 +32,9 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey: []byte(webcfg.Secret),
 		Skipper: func(c echo.Context) bool {
+			if config.IsDev() {
+				return true
+			}
 			skips := strings.Split(webcfg.AuthSkip, ",")
 			if common.InSlice(c.Request().RequestURI, skips) {
 				return true
@@ -52,7 +55,7 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 	log.Info("try start tls server")
 	err := e.StartTLS(fmt.Sprintf("%s:%d", webcfg.Host, webcfg.Port), webcfg.CertFile, webcfg.KeyFile)
 	if err != nil {
-		log.Warningf("start tls server error %s", err)
+		log.Warningf("start tls server error %+v", err)
 		log.Info("start server")
 		err = e.Start(fmt.Sprintf("%s:%d", webcfg.Host, webcfg.Port))
 	}

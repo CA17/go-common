@@ -46,6 +46,12 @@ func FileExists(file string) bool {
 	return err == nil && !info.IsDir()
 }
 
+// 判断文件目录是否存在
+func DirExists(file string) bool {
+	info, err := os.Stat(file)
+	return err == nil && info.IsDir()
+}
+
 // panic error
 func Must(err error) {
 	if err != nil {

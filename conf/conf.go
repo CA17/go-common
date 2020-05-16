@@ -28,10 +28,25 @@ type DBConfig struct {
 	Passwd  string `yaml:"passwd"`
 }
 
+type GrpcConfig struct {
+	Host    string `yaml:"host"`
+	Port    int    `yaml:"port"`
+	CertFile string `yaml:"cert_file"`
+}
+
+type RedisConfig struct {
+	Host     string `yaml:"host"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+}
+
 type AppConfig interface {
 	GetWebConfig() *WebConfig
 	GetDBConfig() *DBConfig
+	GetRedisConfig() *RedisConfig
+	GetGrpcConfig() *GrpcConfig
 	GetAppName() string
+	IsDev() bool
 }
 
 func InitConfig(config AppConfig) error {

@@ -2,10 +2,14 @@ package app
 
 import (
 	"fmt"
+	"strings"
 
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"google.golang.org/grpc"
+
+	"google.golang.org/grpc/credentials"
 
 	"github.com/ca17/go-common/common"
 	"github.com/ca17/go-common/conf"
@@ -27,20 +31,29 @@ func GetDatabase(config *conf.DBConfig) *sqlx.DB {
 	return pool
 }
 
+func GetGrpcConn(config *conf.GrpcConfig) (*grpc.ClientConn, error) {
+	creds, err := credentials.NewClientTLSFromFile(config.CertFile, config.Host)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", config.Host, config.Port), grpc.WithTransportCredentials(creds))
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
+// 上下文管理， 用户管理全局对象
 type ContextManager interface {
 	DBPool() *sqlx.DB
+	GrpConn() *grpc.ClientConn
 	Get(key string) (interface{}, bool)
 	Set(key string, val interface{})
 }
 
-// Model 管理， 用户方法扩展
 type AppContext struct {
-	DB      *sqlx.DB
 	Context ContextManager
 }
 
-func NewAppContext(DB *sqlx.DB, context ContextManager) *AppContext {
-	return &AppContext{DB: DB, Context: context}
+func NewAppContext(context ContextManager) *AppContext {
+	return &AppContext{Context: context}
 }
 
 // Webix 表格列定义
@@ -93,6 +106,7 @@ type CrudFilterLike struct {
 type CrudQuery struct {
 	Table      string
 	Culumns    []string
+	Tags       string
 	LikeNames  []string
 	LikeValue  interface{}
 	Joins      []string
@@ -106,6 +120,15 @@ type CrudQuery struct {
 	PagePos    uint64
 	ResultRef  interface{}
 	ResultPage *PageResult
+}
+
+func (cq *CrudQuery) SetEqValue(key, val string) {
+	if key != "" && val != "" {
+		if cq.Eq == nil {
+			cq.Eq = sq.Eq{}
+		}
+		cq.Eq[key] = val
+	}
 }
 
 func NewCrudQuery(table string, culumns []string, resultRef interface{}) *CrudQuery {
@@ -142,7 +165,7 @@ func (m *AppContext) DBGet(cg *CrudGet) error {
 		Where(cg.Filter).Limit(1).
 		ToSql()
 
-	err := m.DB.Get(cg.ResultRef, sql, args...)
+	err := m.Context.DBPool().Get(cg.ResultRef, sql, args...)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -154,6 +177,15 @@ func (m *AppContext) DBGet(cg *CrudGet) error {
 func (m *AppContext) DBQuery(cq *CrudQuery) error {
 	// 查询过滤
 	var filterBuilder = func(b sq.SelectBuilder) sq.SelectBuilder {
+
+		if cq.Tags != "" {
+			orwheres := []string{}
+			for _, tag := range strings.Split(cq.Tags, ",") {
+				orwheres = append(orwheres, fmt.Sprintf("FIND_IN_SET(\"%s\", tags)", tag))
+			}
+			b = b.Where(fmt.Sprintf(" ( %s ) ", strings.Join(orwheres, " or ")))
+		}
+
 		if cq.Joins != nil {
 			for _, join := range cq.Joins {
 				b = b.Join(join)
@@ -211,7 +243,7 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 	if log.IsDebug {
 		log.Debug(sql, args)
 	}
-	err := m.DB.Select(cq.ResultRef, sql, args...)
+	err := m.Context.DBPool().Select(cq.ResultRef, sql, args...)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -227,7 +259,7 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 			if log.IsDebug {
 				log.Debug(sql, args)
 			}
-			err := m.DB.Get(&total, sqlbc, argsbc...)
+			err := m.Context.DBPool().Get(&total, sqlbc, argsbc...)
 			if err != nil {
 				log.Error(err)
 				cq.ResultPage = EmptyPageResult
@@ -242,7 +274,7 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 
 // CRUD 增加数据对象
 func (m *AppContext) DBAdd(ca *CrudAdd) error {
-	tx, err := m.DB.Begin()
+	tx, err := m.Context.DBPool().Begin()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -299,7 +331,7 @@ func (m *AppContext) DBUpdate(cu *CrudUpdate) error {
 	if log.IsDebug {
 		log.Debug(sql, args)
 	}
-	_, err := m.DB.Exec(sql, args...)
+	_, err := m.Context.DBPool().Exec(sql, args...)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -311,7 +343,7 @@ func (m *AppContext) DBUpdate(cu *CrudUpdate) error {
 func (m *AppContext) DBDelete(table string, ids []string) error {
 	for _, id := range ids {
 		sql, args, _ := sq.Delete(table).Where(sq.Eq{"id": id}).ToSql()
-		_, err := m.DB.Exec(sql, args...)
+		_, err := m.Context.DBPool().Exec(sql, args...)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -322,6 +354,6 @@ func (m *AppContext) DBDelete(table string, ids []string) error {
 
 // 清空表
 func (m *AppContext) DBTrucate(table string) error {
-	_, err := m.DB.Exec("TRUNCATE TABLE " + table)
+	_, err := m.Context.DBPool().Exec("TRUNCATE TABLE " + table)
 	return err
 }
