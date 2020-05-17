@@ -34,7 +34,7 @@ func MakeDir(path string) {
 	f, err := os.Stat(path)
 	if err != nil || f.IsDir() == false {
 		if err := os.Mkdir(path, os.ModePerm); err != nil {
-			log.Fatalf("create dir fail！", err)
+			log.Println("create dir fail！", err)
 			return
 		}
 	}
@@ -252,10 +252,26 @@ func IfNA(src string, defval string) string {
 	return src
 }
 
+const _NA = "N/A"
 
 func EmptyToNA(src string) string {
 	if src == "" {
-		return "N/A"
+		return _NA
 	}
 	return src
+}
+
+
+
+func SetEmptyStrToNA(t interface{}) {
+	d := reflect.TypeOf(t).Elem()
+	for j := 0; j < d.NumField(); j++ {
+		ctype := d.Field(j).Type.String()
+		if ctype == "string"{
+			val := reflect.ValueOf(t).Elem().Field(j)
+			if val.String() == ""{
+				val.SetString(_NA)
+			}
+		}
+	}
 }
