@@ -158,6 +158,10 @@ func NewCrudUpdate(table string, vals map[string]interface{}, filter map[string]
 }
 
 // CRUD 获取单个对象
+func (m *AppContext) DBGet2(table string, culumns []string, filter map[string]interface{}, resultRef interface{}) error {
+	return m.DBGet(NewCrudGet(table, culumns, filter ,resultRef))
+}
+
 func (m *AppContext) DBGet(cg *CrudGet) error {
 	sql, args, _ := sq.
 		Select(cg.Culumns...).
@@ -314,7 +318,14 @@ func (m *AppContext) DBAdd(ca *CrudAdd) error {
 	return nil
 }
 
+
 // CRUD 数据更新
+func (m *AppContext) DBUpdate2(table string, vals map[string]interface{}, filter map[string]interface{}) error {
+	cu := NewCrudUpdate(table, vals , filter)
+	return m.DBUpdate(cu)
+}
+
+
 func (m *AppContext) DBUpdate(cu *CrudUpdate) error {
 	b := sq.Update(cu.Table).SetMap(cu.Vals)
 	if cu.Eq != nil {

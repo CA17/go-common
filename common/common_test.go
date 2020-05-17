@@ -77,7 +77,6 @@ func TestSetMapFrom(t *testing.T) {
 	m := map[string]interface{}{}
 	v := S{
 		Name:   "name",
-		Age: 12,
 		Value:  "vvv",
 		Value1: "",
 		Value2: "",

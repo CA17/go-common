@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -108,7 +109,7 @@ func (h *HttpHandler) FetchExcelData(c echo.Context, sheet string) ([]map[string
 
 	f, err := excelize.OpenReader(src)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("不是有效的 Excel 文件")
 	}
 	// 获取 Sheet1 上所有单元格
 	rows := f.GetRows(sheet)

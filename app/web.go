@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"errors"
 	"net/url"
 	"strconv"
 
@@ -72,6 +73,18 @@ func (f *WebForm) GetVal(name string) string {
 	return ""
 }
 
+func (f *WebForm) GetMustVal(name string) (string, error) {
+	val := f.Posts.Get(name)
+	if val != "" {
+		return val, nil
+	}
+	val = f.Gets.Get(name)
+	if val != "" {
+		return val, nil
+	}
+	return "", errors.New(name+" 不能为空")
+}
+
 func (f *WebForm) GetVal2(name string, defval string) string {
 	val := f.Posts.Get(name)
 	if val != "" {
@@ -101,3 +114,16 @@ func (f *WebForm) GetInt64Val(name string, defval int64) int64 {
 	v, _ := strconv.ParseInt(val, 10, 64)
 	return v
 }
+
+func (f *WebForm) GetUpdateMap(names []string) map[string]interface{} {
+	var mval = map[string]interface{}{}
+	for _, name := range names {
+		val := f.GetVal(name)
+		if val != "" {
+			mval[name] = val
+		}
+	}
+	return mval
+}
+
+

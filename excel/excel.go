@@ -2,6 +2,8 @@ package excel
 
 import (
 	"fmt"
+	"io/ioutil"
+	"path"
 	"reflect"
 	"strings"
 	"time"
@@ -10,6 +12,7 @@ import (
 
 	"github.com/ca17/go-common/sqltype"
 )
+
 
 func WriteToFile(sheet string, records []interface{}, filepath string) error {
 	xlsx := excelize.NewFile()
@@ -21,6 +24,23 @@ func WriteToFile(sheet string, records []interface{}, filepath string) error {
 
 	xlsx.SetActiveSheet(index)
 	return xlsx.SaveAs(filepath)
+
+}
+
+
+func WriteToTmpFile(sheet string, records []interface{}) (string, error) {
+	filename := fmt.Sprintf("%s-%d.xlsx", sheet, time.Now().Unix())
+	tmpdir, _ := ioutil.TempDir("", "excel-export")
+	filepath := path.Join(tmpdir, filename)
+	xlsx := excelize.NewFile()
+	index := xlsx.NewSheet(sheet)
+
+	for i, t := range records {
+		WriteRow(t, i, xlsx, sheet)
+	}
+
+	xlsx.SetActiveSheet(index)
+	return filepath, xlsx.SaveAs(filepath)
 
 }
 
@@ -40,17 +60,17 @@ func WriteRow(t interface{}, i int, xlsx *excelize.File, sheet string) {
 		case "string":
 			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), reflect.ValueOf(t).Elem().Field(j).String())
 		case "int":
-			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), reflect.ValueOf(t).Elem().Field(j).Int())
+			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), fmt.Sprintf("%d", reflect.ValueOf(t).Elem().Field(j).Int()))
 		case "int32":
-			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), reflect.ValueOf(t).Elem().Field(j).Int())
+			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), fmt.Sprintf("%d", reflect.ValueOf(t).Elem().Field(j).Int()))
 		case "int64":
-			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), reflect.ValueOf(t).Elem().Field(j).Int())
+			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), fmt.Sprintf("%d", reflect.ValueOf(t).Elem().Field(j).Int()))
 		case "bool":
-			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), reflect.ValueOf(t).Elem().Field(j).Bool())
+			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), fmt.Sprintf("%v", reflect.ValueOf(t).Elem().Field(j).Bool()))
 		case "float32":
-			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), reflect.ValueOf(t).Elem().Field(j).Float())
+			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), fmt.Sprintf("%f", reflect.ValueOf(t).Elem().Field(j).Float()))
 		case "float64":
-			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), reflect.ValueOf(t).Elem().Field(j).Float())
+			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), fmt.Sprintf("%f", reflect.ValueOf(t).Elem().Field(j).Float()))
 		case "time.Time":
 			xlsx.SetCellValue(sheet, fmt.Sprintf("%s%d", column, i+2), reflect.ValueOf(t).Elem().Field(j).Interface().(time.Time).Format("2006-01-02 15:04:05"))
 		case "sqltype.JsonNullTime":

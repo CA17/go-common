@@ -21,6 +21,13 @@ import (
 
 var (
 	EmptyList = new([]interface{})
+	EmptyTime, _ = time.Parse("2006-01-02 15:04:05 Z0700 MST", "1979-11-30 00:00:00 +0000 GMT")
+)
+
+const (
+	NA = "N/A"
+	ENABLED = "enabled"
+	DISABLED = "disabled"
 )
 
 // print usage
@@ -250,11 +257,11 @@ func IfNA(src string, defval string) string {
 	return src
 }
 
-const _NA = "N/A"
+
 
 func EmptyToNA(src string) string {
 	if src == "" {
-		return _NA
+		return NA
 	}
 	return src
 }
@@ -266,26 +273,9 @@ func SetEmptyStrToNA(t interface{}) {
 		if ctype == "string" {
 			val := reflect.ValueOf(t).Elem().Field(j)
 			if val.String() == "" {
-				val.SetString(_NA)
+				val.SetString(NA)
 			}
 		}
 	}
 }
 
-func SetMapFrom(mval map[string]interface{}, t interface{}) {
-	d := reflect.TypeOf(t).Elem()
-	for j := 0; j < d.NumField(); j++ {
-		upname := d.Field(j).Tag.Get("update")
-		if upname == "" {
-			continue
-		}
-		ctype := d.Field(j).Type.String()
-		switch ctype {
-		case "string":
-			val := reflect.ValueOf(t).Elem().Field(j).String()
-			mval[upname] = EmptyToNA(val)
-		default:
-			mval[upname] = reflect.ValueOf(t).Elem().Field(j).Interface()
-		}
-	}
-}

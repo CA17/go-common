@@ -6,6 +6,8 @@ import (
 	"github.com/op/go-logging"
 )
 
+const SystemLogModule = "System"
+
 func init() {
 	var format = logging.MustStringFormatter(
 		`%{color}%{time:15:04:05.000} %{pid} %{shortfile} %{shortfunc} > %{level:.4s} %{id:03x}%{color:reset} %{message}`,
@@ -15,7 +17,7 @@ func init() {
 	logging.SetBackend(backend2Formatter)
 }
 
-var log = logging.MustGetLogger("System")
+var log = logging.MustGetLogger(SystemLogModule)
 
 var (
 	Error    = log.Error
