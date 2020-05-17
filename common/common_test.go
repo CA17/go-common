@@ -15,7 +15,8 @@ func TestPath(t *testing.T) {
 
 type S struct {
 	Name   string
-	Value  string
+	Age    int    `update:"age"`
+	Value  string `update:"value"`
 	Value1 string
 	Value2 string
 	Value3 string
@@ -70,4 +71,21 @@ func BenchmarkSetEmptyStrToNAn(b *testing.B) {
 		v.Value4 = _NA
 		v.Value5 = _NA
 	}
+}
+
+func TestSetMapFrom(t *testing.T) {
+	m := map[string]interface{}{}
+	v := S{
+		Name:   "name",
+		Age: 12,
+		Value:  "vvv",
+		Value1: "",
+		Value2: "",
+		Value3: "",
+		Value4: "",
+		Value5: "",
+	}
+	SetMapFrom(m, &v)
+	fmt.Printf("%+v", m)
+
 }

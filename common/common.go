@@ -243,10 +243,8 @@ func CopyFile(dstName, srcName string, perm os.FileMode) (written int64, err err
 	return io.Copy(dst, src)
 }
 
-
-
 func IfNA(src string, defval string) string {
-	if src == "N/A" || src == ""{
+	if src == "N/A" || src == "" {
 		return defval
 	}
 	return src
@@ -261,17 +259,33 @@ func EmptyToNA(src string) string {
 	return src
 }
 
-
-
 func SetEmptyStrToNA(t interface{}) {
 	d := reflect.TypeOf(t).Elem()
 	for j := 0; j < d.NumField(); j++ {
 		ctype := d.Field(j).Type.String()
-		if ctype == "string"{
+		if ctype == "string" {
 			val := reflect.ValueOf(t).Elem().Field(j)
-			if val.String() == ""{
+			if val.String() == "" {
 				val.SetString(_NA)
 			}
+		}
+	}
+}
+
+func SetMapFrom(mval map[string]interface{}, t interface{}) {
+	d := reflect.TypeOf(t).Elem()
+	for j := 0; j < d.NumField(); j++ {
+		upname := d.Field(j).Tag.Get("update")
+		if upname == "" {
+			continue
+		}
+		ctype := d.Field(j).Type.String()
+		switch ctype {
+		case "string":
+			val := reflect.ValueOf(t).Elem().Field(j).String()
+			mval[upname] = EmptyToNA(val)
+		default:
+			mval[upname] = reflect.ValueOf(t).Elem().Field(j).Interface()
 		}
 	}
 }
