@@ -32,6 +32,8 @@ systemctl enable {{appname}} && systemctl daemon-reload
 
 func Install(appname,  user, group string) error {
 	InstallScript = strings.ReplaceAll(InstallScript, "{{appname}}", appname)
+	InstallScript = strings.ReplaceAll(InstallScript, "{{user}}", user)
+	InstallScript = strings.ReplaceAll(InstallScript, "{{group}}", group)
 	scriptfile := fmt.Sprintf("/tmp/%s_install.sh", appname)
 	_ = ioutil.WriteFile(scriptfile, []byte(InstallScript), 777)
 	if err := exec.Command("/bin/bash", scriptfile).Run(); err != nil {

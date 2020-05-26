@@ -9,6 +9,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+
+// 界面通用下拉选项模型
+type JsonOptions struct {
+	Id    interface{} `json:"id"`
+	Value interface{} `json:"value"`
+}
+
 type DateRange struct {
 	Start string `json:"start"`
 	End   string `json:"end"`

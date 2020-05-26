@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	sha256_ "crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -20,7 +21,8 @@ import (
 )
 
 var (
-	EmptyList = new([]interface{})
+	TIME_LAYOUT = "2006-01-02 15:04:05"
+	EmptyList = []interface{}{}
 	EmptyTime, _ = time.Parse("2006-01-02 15:04:05 Z0700 MST", "1979-11-30 00:00:00 +0000 GMT")
 )
 
@@ -155,58 +157,12 @@ func If(condition bool, trueVal, falseVal interface{}) interface{} {
 	return falseVal
 }
 
-func IfEmpty(src interface{}, defval interface{}) interface{} {
-	if IsEmpty(src) {
-		return defval
-	}
-	return src
-}
+
 func IfEmptyStr(src string, defval string) string {
 	if src == "" {
 		return defval
 	}
 	return src
-}
-
-// IsEmpty checks if a value is empty or not.
-// A value is considered empty if
-// - integer, float: zero
-// - bool: false
-// - string, array: len() == 0
-// - slice, map: nil or len() == 0
-// - interface, pointer: nil or the referenced value is empty
-func IsEmpty(value interface{}) bool {
-	v := reflect.ValueOf(value)
-	switch v.Kind() {
-	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
-		return v.Len() == 0
-	case reflect.Bool:
-		return !v.Bool()
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return v.Int() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return v.Uint() == 0
-	case reflect.Float32, reflect.Float64:
-		return v.Float() == 0
-	case reflect.Invalid:
-		return true
-	case reflect.Interface, reflect.Ptr:
-		if v.IsNil() {
-			return true
-		}
-		return IsEmpty(v.Elem().Interface())
-	case reflect.Struct:
-		v, ok := value.(time.Time)
-		if ok && v.IsZero() {
-			return true
-		}
-	}
-
-	return false
-}
-
-func IsNotEmpty(value interface{}) bool {
-	return !IsEmpty(value)
 }
 
 func split(s string, size int) []string {
@@ -279,3 +235,18 @@ func SetEmptyStrToNA(t interface{}) {
 	}
 }
 
+
+// 解析表单时间
+// t 表单时间字符串
+// hms 时分秒
+func ParseFormTime(t, hms string) (time.Time, error){
+	if len(t) < 10 {
+		return EmptyTime, errors.New("时间格式不正确， 必须是yyyy-MM-dd")
+	}
+	timestr := t[:10] +" "+hms
+	loc, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		return EmptyTime, err
+	}
+	return time.ParseInLocation(TIME_LAYOUT, timestr, loc)
+}
