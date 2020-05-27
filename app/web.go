@@ -12,7 +12,7 @@ import (
 
 // 界面通用下拉选项模型
 type JsonOptions struct {
-	Id    interface{} `json:"id"`
+	Id    string `json:"id"`
 	Value interface{} `json:"value"`
 }
 
@@ -55,15 +55,15 @@ func (f *WebForm) Param2(name string, defval string) string {
 	return defval
 }
 
-func (f *WebForm) GetDateRange(name string) (*DateRange, error) {
-	var dr = &DateRange{Start: "", End: ""}
+func (f *WebForm) GetDateRange(name string) (DateRange, error) {
+	var dr = DateRange{Start: "", End: ""}
 	val := f.GetVal(name)
 	if val == "" {
 		return dr, nil
 	}
-	err := json.Unmarshal([]byte(val), dr)
+	err := json.Unmarshal([]byte(val), &dr)
 	if err != nil {
-		return nil, err
+		return dr, err
 	}
 	return dr, nil
 }

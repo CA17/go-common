@@ -46,6 +46,7 @@ type AppConfig interface {
 	GetRedisConfig() *RedisConfig
 	GetGrpcConfig() *GrpcConfig
 	GetAppName() string
+	GetSyslogAddr() string
 	IsDev() bool
 }
 

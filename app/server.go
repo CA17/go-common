@@ -39,6 +39,14 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 			if common.InSlice(c.Request().RequestURI, skips) {
 				return true
 			}
+			skipPrefix, ok := appContext.Get(AuthSkipPrefix)
+			if ok {
+				for _, p := range skipPrefix.([]string) {
+					if strings.HasPrefix(c.Request().RequestURI, p){
+						return true
+					}
+				}
+			}
 			return false
 		},
 	}))

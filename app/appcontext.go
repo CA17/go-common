@@ -1,6 +1,7 @@
 package app
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 
@@ -50,6 +51,14 @@ type ContextManager interface {
 
 type AppContext struct {
 	Context ContextManager
+}
+
+func (m *AppContext) Set(key string, val interface{}) {
+	m.Context.Set(key, val)
+}
+
+func (m *AppContext) Get(key string) (interface{}, bool) {
+	return m.Context.Get(key)
 }
 
 func NewAppContext(context ContextManager) *AppContext {
@@ -109,6 +118,8 @@ type CrudQuery struct {
 	Tags       string
 	LikeNames  []string
 	LikeValue  interface{}
+	DateRange  DateRange
+	DateColumn string
 	Joins      []string
 	LeftJoins  []string
 	Eq         sq.Eq
@@ -146,6 +157,7 @@ func NewCrudAdd(table string, vals []map[string]interface{}) *CrudAdd {
 }
 
 type CrudUpdate struct {
+	tx     *sql.Tx
 	Table  string
 	Vals   map[string]interface{}
 	Eq     sq.Eq
@@ -159,7 +171,7 @@ func NewCrudUpdate(table string, vals map[string]interface{}, filter map[string]
 
 // CRUD 获取单个对象
 func (m *AppContext) DBGet2(table string, culumns []string, filter map[string]interface{}, resultRef interface{}) error {
-	return m.DBGet(NewCrudGet(table, culumns, filter ,resultRef))
+	return m.DBGet(NewCrudGet(table, culumns, filter, resultRef))
 }
 
 func (m *AppContext) DBGet(cg *CrudGet) error {
@@ -188,6 +200,15 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 				orwheres = append(orwheres, fmt.Sprintf("FIND_IN_SET(\"%s\", tags)", tag))
 			}
 			b = b.Where(fmt.Sprintf(" ( %s ) ", strings.Join(orwheres, " or ")))
+		}
+
+		if cq.DateColumn != "" {
+			if cq.DateRange.End != "" {
+				b = b.Where(sq.LtOrEq{cq.DateColumn: cq.DateRange.End})
+			}
+			if cq.DateRange.Start != "" {
+				b = b.Where(sq.GtOrEq{cq.DateColumn: cq.DateRange.Start})
+			}
 		}
 
 		if cq.Joins != nil {
@@ -239,7 +260,7 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 	// 设置分页查询参数
 	if cq.Pager {
 		cq.ResultPage = EmptyPageResult
-		bs = bs.Offset(cq.PagePos).Limit(cq.PagePos)
+		bs = bs.Offset(cq.PagePos).Limit(cq.PageSize)
 	}
 
 	// 查询数据
@@ -273,6 +294,37 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 		cq.ResultPage = &PageResult{Data: cq.ResultRef, Pos: int64(cq.PagePos), TotalCount: total}
 	}
 
+	return nil
+}
+
+// CRUD 增加数据对象
+func (m *AppContext) DBInsert(table string, vals map[string]interface{}) error {
+	return m.DBInsertWithTx(nil, table, vals)
+}
+func (m *AppContext) DBInsertWithTx(tx *sql.Tx, table string, vals map[string]interface{}) error {
+	var cols []string
+	var values []interface{}
+	for k, v := range vals {
+		cols = append(cols, k)
+		values = append(values, v)
+	}
+	sql, args, err := sq.Insert(table).Columns(cols...).Values(values...).ToSql()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if log.IsDebug {
+		log.Debug(sql, args)
+	}
+	if tx != nil {
+		_, err = tx.Exec(sql, args...)
+	} else {
+		_, err = m.Context.DBPool().Exec(sql, args...)
+	}
+
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -318,13 +370,18 @@ func (m *AppContext) DBAdd(ca *CrudAdd) error {
 	return nil
 }
 
-
 // CRUD 数据更新
 func (m *AppContext) DBUpdate2(table string, vals map[string]interface{}, filter map[string]interface{}) error {
-	cu := NewCrudUpdate(table, vals , filter)
+	cu := NewCrudUpdate(table, vals, filter)
 	return m.DBUpdate(cu)
 }
 
+// CRUD 数据更新
+func (m *AppContext) DBUpdate2WithTx(tx *sql.Tx, table string, vals map[string]interface{}, filter map[string]interface{}) error {
+	cu := NewCrudUpdate(table, vals, filter)
+	cu.tx = tx
+	return m.DBUpdate(cu)
+}
 
 func (m *AppContext) DBUpdate(cu *CrudUpdate) error {
 	b := sq.Update(cu.Table).SetMap(cu.Vals)
@@ -342,7 +399,12 @@ func (m *AppContext) DBUpdate(cu *CrudUpdate) error {
 	if log.IsDebug {
 		log.Debug(sql, args)
 	}
-	_, err := m.Context.DBPool().Exec(sql, args...)
+	var err error
+	if cu.tx != nil {
+		_, err = cu.tx.Exec(sql, args...)
+	} else {
+		_, err = m.Context.DBPool().Exec(sql, args...)
+	}
 	if err != nil {
 		log.Error(err)
 		return err
@@ -352,13 +414,40 @@ func (m *AppContext) DBUpdate(cu *CrudUpdate) error {
 
 // 根据id删除表数据
 func (m *AppContext) DBDelete(table string, ids []string) error {
+	return m.DBDeleteWithTx(nil, table, ids)
+}
+
+func (m *AppContext) DBDeleteWithTx(tx *sql.Tx, table string, ids []string) error {
 	for _, id := range ids {
 		sql, args, _ := sq.Delete(table).Where(sq.Eq{"id": id}).ToSql()
-		_, err := m.Context.DBPool().Exec(sql, args...)
+		var err error
+		if tx != nil {
+			_, err = tx.Exec(sql, args...)
+		} else {
+			_, err = m.Context.DBPool().Exec(sql, args...)
+		}
 		if err != nil {
 			log.Error(err)
 			continue
 		}
+	}
+	return nil
+}
+
+func (m *AppContext) DBDeleteWithFilter(table string, filter map[string]interface{}) error {
+	return m.DBDeleteWithFilterTx(nil, table, filter)
+}
+
+func (m *AppContext) DBDeleteWithFilterTx(tx *sql.Tx, table string, filter map[string]interface{}) error {
+	sql, args, _ := sq.Delete(table).Where(filter).ToSql()
+	var err error
+	if tx != nil {
+		_, err = tx.Exec(sql, args...)
+	} else {
+		_, err = m.Context.DBPool().Exec(sql, args...)
+	}
+	if err != nil {
+		log.Error(err)
 	}
 	return nil
 }
