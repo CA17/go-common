@@ -4,31 +4,33 @@ import (
 	"crypto/rand"
 	sha256_ "crypto/sha256"
 	"encoding/base64"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	mrand "math/rand"
+	"net/url"
 	"os"
+	"path"
 	"reflect"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/snowflake"
+	"github.com/pkg/errors"
 )
 
 var (
-	TIME_LAYOUT = "2006-01-02 15:04:05"
-	EmptyList = []interface{}{}
+	TIME_LAYOUT  = "2006-01-02 15:04:05"
+	EmptyList    = []interface{}{}
 	EmptyTime, _ = time.Parse("2006-01-02 15:04:05 Z0700 MST", "1979-11-30 00:00:00 +0000 GMT")
 )
 
 const (
-	NA = "N/A"
-	ENABLED = "enabled"
+	NA       = "N/A"
+	ENABLED  = "enabled"
 	DISABLED = "disabled"
 )
 
@@ -64,7 +66,14 @@ func DirExists(file string) bool {
 // panic error
 func Must(err error) {
 	if err != nil {
-		panic(err)
+		panic(errors.WithStack(err))
+	}
+}
+
+func MustCallBefore(err error, callbefore func()) {
+	if err != nil {
+		callbefore()
+		panic(errors.WithStack(err))
 	}
 }
 
@@ -157,7 +166,6 @@ func If(condition bool, trueVal, falseVal interface{}) interface{} {
 	return falseVal
 }
 
-
 func IfEmptyStr(src string, defval string) string {
 	if src == "" {
 		return defval
@@ -213,8 +221,6 @@ func IfNA(src string, defval string) string {
 	return src
 }
 
-
-
 func EmptyToNA(src string) string {
 	if src == "" {
 		return NA
@@ -235,18 +241,24 @@ func SetEmptyStrToNA(t interface{}) {
 	}
 }
 
-
 // 解析表单时间
 // t 表单时间字符串
 // hms 时分秒
-func ParseFormTime(t, hms string) (time.Time, error){
+func ParseFormTime(t, hms string) (time.Time, error) {
 	if len(t) < 10 {
 		return EmptyTime, errors.New("时间格式不正确， 必须是yyyy-MM-dd")
 	}
-	timestr := t[:10] +" "+hms
+	timestr := t[:10] + " " + hms
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	if err != nil {
 		return EmptyTime, err
 	}
 	return time.ParseInLocation(TIME_LAYOUT, timestr, loc)
+}
+
+func UrlJoin(hurl string, elm ...string) string {
+	u, err := url.Parse(hurl)
+	Must(err)
+	u.Path = path.Join(u.Path, path.Join(elm...))
+	return u.String()
 }

@@ -64,27 +64,15 @@ func BenchmarkSetEmptyStrToNAn(b *testing.B) {
 			Value4: "",
 			Value5: "",
 		}
-		v.Value = _NA
-		v.Value1 = _NA
-		v.Value2 = _NA
-		v.Value3 = _NA
-		v.Value4 = _NA
-		v.Value5 = _NA
+		v.Value = NA
+		v.Value1 = NA
+		v.Value2 = NA
+		v.Value3 = NA
+		v.Value4 = NA
+		v.Value5 = NA
 	}
 }
 
-func TestSetMapFrom(t *testing.T) {
-	m := map[string]interface{}{}
-	v := S{
-		Name:   "name",
-		Value:  "vvv",
-		Value1: "",
-		Value2: "",
-		Value3: "",
-		Value4: "",
-		Value5: "",
-	}
-	SetMapFrom(m, &v)
-	fmt.Printf("%+v", m)
-
+func TestUrlJoin(t *testing.T) {
+	fmt.Println(UrlJoin("http://123.com/","sa","aaa"))
 }
