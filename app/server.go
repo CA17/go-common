@@ -20,7 +20,7 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 	}))
-	e.Use(middleware.Recover())
+	e.Use(ServerRecover(config.GetWebConfig().Debug))
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "[${time_rfc3339}] ${remote_ip} ${method} ${uri} ${protocol} ${status} ${id} ${user_agent} ${error}\n",
 		Output: os.Stdout,

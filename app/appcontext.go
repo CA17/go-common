@@ -45,6 +45,7 @@ func GetGrpcConn(config *conf.GrpcConfig) (*grpc.ClientConn, error) {
 type ContextManager interface {
 	DBPool() *sqlx.DB
 	GrpConn() *grpc.ClientConn
+	GetAppConfig() interface{}
 	Get(key string) (interface{}, bool)
 	Set(key string, val interface{})
 }
@@ -60,6 +61,7 @@ func (m *AppContext) Set(key string, val interface{}) {
 func (m *AppContext) Get(key string) (interface{}, bool) {
 	return m.Context.Get(key)
 }
+
 
 func NewAppContext(context ContextManager) *AppContext {
 	return &AppContext{Context: context}
@@ -223,7 +225,7 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 			}
 		}
 
-		if cq.Wheres != nil {
+		if cq.Wheres != nil && len(cq.Wheres) > 0 {
 			for _, where := range cq.Wheres {
 				if where != "" {
 					b = b.Where(where)
@@ -231,7 +233,7 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 			}
 		}
 
-		if cq.LikeValue != "" {
+		if cq.LikeValue != "" && cq.LikeNames != nil{
 			like := fmt.Sprintf("%s%%", cq.LikeValue)
 			ormap := sq.Or{}
 			for _, name := range cq.LikeNames {
