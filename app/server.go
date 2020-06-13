@@ -28,6 +28,8 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: strings.Split(webcfg.AllowOrigins, ","),
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
+		// AllowHeaders: []string{"Content-Type"},
+		AllowCredentials:true,
 	}))
 	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey: []byte(webcfg.Secret),
@@ -57,6 +59,8 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 	for _, webHandler := range handler {
 		webHandler.InitRouter(webctx, group)
 	}
+
+
 
 	e.HideBanner = true
 	e.Debug = webcfg.Debug
