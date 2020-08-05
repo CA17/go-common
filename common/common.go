@@ -15,6 +15,7 @@ import (
 	"path"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -262,3 +263,55 @@ func UrlJoin(hurl string, elm ...string) string {
 	u.Path = path.Join(u.Path, path.Join(elm...))
 	return u.String()
 }
+
+func Interface2String(inter interface{}) string {
+	switch inter.(type) {
+	case string:
+		return inter.(string)
+	case int64:
+		return strconv.FormatInt(inter.(int64), 10)
+	case int:
+		return strconv.Itoa(inter.(int))
+	case float32:
+		return fmt.Sprintf("%f", inter.(float32))
+	case float64:
+		return fmt.Sprintf("%f", inter.(float64))
+	default:
+		return fmt.Sprintf("%v", inter)
+	}
+}
+
+func GetValuesFromMapByKey(valmap map[string]string, keys []string) string {
+	var result = make([]string, 0)
+	for _, key := range keys {
+		val, ok := valmap[key]
+		if ok && val != "" {
+			result = append(result, val)
+		}
+	}
+	return strings.Join(result, ",")
+}
+
+func FmtSecondDesc(secs int64) string {
+
+	if secs > 60 && secs < 3600 {
+		m := secs / 60
+		return fmt.Sprintf("%d分钟", m)
+	}
+
+	if secs > 3600 && secs < 86400 {
+		h := secs / 3600
+		m := secs % 3600 / 60
+		return fmt.Sprintf("%d小时%d分钟", h, m)
+	}
+
+	if secs > 86400 {
+		d := secs / 86400
+		h := secs % 86400 / 3600
+		m := secs % 86400 % 3600 / 60
+		return fmt.Sprintf("%d天%d小时%d分钟", d, h, m)
+	}
+
+	return fmt.Sprintf("%d秒", secs)
+}
+

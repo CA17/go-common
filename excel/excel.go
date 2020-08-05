@@ -13,7 +13,6 @@ import (
 	"github.com/ca17/go-common/sqltype"
 )
 
-
 func WriteToFile(sheet string, records []interface{}, filepath string) error {
 	xlsx := excelize.NewFile()
 	index := xlsx.NewSheet(sheet)
@@ -26,7 +25,6 @@ func WriteToFile(sheet string, records []interface{}, filepath string) error {
 	return xlsx.SaveAs(filepath)
 
 }
-
 
 func WriteToTmpFile(sheet string, records []interface{}) (string, error) {
 	filename := fmt.Sprintf("%s-%d.xlsx", sheet, time.Now().Unix())

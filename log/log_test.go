@@ -15,7 +15,7 @@ func TestFileLog(t *testing.T) {
 		MaxBackups: 3,
 		MaxAge:     28,
 		Compress:   true,
-	},"p1",0)
+	}, "p1", 0)
 
 	_log.Println("asdasdasd")
 
@@ -25,8 +25,7 @@ func TestFileLog(t *testing.T) {
 		MaxBackups: 3,
 		MaxAge:     28,
 		Compress:   true,
-	},"p1:",0)
-
+	}, "p1:", 0)
 
 	_log2.Println("asdasdasd")
 	_log2.Println("34563465364")

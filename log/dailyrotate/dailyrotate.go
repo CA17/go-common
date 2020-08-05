@@ -1,6 +1,5 @@
 package dailyrotate
 
-
 import (
 	"io"
 	"os"

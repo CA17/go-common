@@ -7,13 +7,25 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-)
 
+	"github.com/ca17/go-common/common"
+)
 
 // 界面通用下拉选项模型
 type JsonOptions struct {
-	Id    string `json:"id"`
+	Id    string      `json:"id"`
 	Value interface{} `json:"value"`
+}
+
+func (d JsonOptions) MarshalJSON() ([]byte, error) {
+	type Alias JsonOptions
+	return json.Marshal(&struct {
+		Alias
+		Id string `json:"id" `
+	}{
+		Alias: (Alias)(d),
+		Id:    common.Interface2String(d.Id),
+	})
 }
 
 type DateRange struct {
@@ -89,7 +101,7 @@ func (f *WebForm) GetMustVal(name string) (string, error) {
 	if val != "" {
 		return val, nil
 	}
-	return "", errors.New(name+" 不能为空")
+	return "", errors.New(name + " 不能为空")
 }
 
 func (f *WebForm) GetVal2(name string, defval string) string {
@@ -132,5 +144,3 @@ func (f *WebForm) GetUpdateMap(names []string) map[string]interface{} {
 	}
 	return mval
 }
-
-

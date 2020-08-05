@@ -30,7 +30,7 @@ chmod 600 /usr/lib/systemd/system/{{appname}}.service
 systemctl enable {{appname}} && systemctl daemon-reload
 `
 
-func Install(appname,  user, group string) error {
+func Install(appname, user, group string) error {
 	InstallScript = strings.ReplaceAll(InstallScript, "{{appname}}", appname)
 	InstallScript = strings.ReplaceAll(InstallScript, "{{user}}", user)
 	InstallScript = strings.ReplaceAll(InstallScript, "{{group}}", group)

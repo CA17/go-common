@@ -74,5 +74,10 @@ func BenchmarkSetEmptyStrToNAn(b *testing.B) {
 }
 
 func TestUrlJoin(t *testing.T) {
-	fmt.Println(UrlJoin("http://123.com/","sa","aaa"))
+	fmt.Println(UrlJoin("http://123.com/", "sa", "aaa"))
+}
+
+func TestSecond(t *testing.T) {
+	fmt.Println(fmtSecondDesc(3120))
+	fmt.Println(fmtSecondDesc(31200))
 }

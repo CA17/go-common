@@ -7,8 +7,8 @@ import (
 
 const (
 	Datetime14Layout      = "20060102150405"
-	Datetime8Layout      = "20060102"
-	Datetime6Layout      = "200601"
+	Datetime8Layout       = "20060102"
+	Datetime6Layout       = "200601"
 	YYYYMMDDHHMMSS_LAYOUT = "2006-01-02 15:04:05"
 	YYYYMMDDHHMM_LAYOUT   = "2006-01-02 15:04"
 	YYYYMMDD_LAYOUT       = "2006-01-02"
@@ -16,8 +16,8 @@ const (
 
 var (
 	ShangHaiLOC, _ = time.LoadLocation("Asia/Shanghai")
-	EmptyList    = make([]interface{}, 0)
-	EmptyTime, _ = time.Parse("2006-01-02 15:04:05 Z0700 MST", "1979-11-30 00:00:00 +0000 GMT")
+	EmptyList      = make([]interface{}, 0)
+	EmptyTime, _   = time.Parse("2006-01-02 15:04:05 Z0700 MST", "1979-11-30 00:00:00 +0000 GMT")
 )
 
 func FmtCstDatetime(t time.Time) string {
@@ -68,7 +68,6 @@ func ParseFormTime(t, hms string) (time.Time, error) {
 	}
 	return time.ParseInLocation(YYYYMMDDHHMMSS_LAYOUT, timestr, loc)
 }
-
 
 func parseWithLocation(locationName string, timeStr string, format string) (time.Time, error) {
 	if l, err := time.LoadLocation(locationName); err != nil {

@@ -118,5 +118,7 @@ var (
 	Debug    = log.Debug
 	Debugf   = log.Debugf
 
-	IsDebug = log.IsEnabledFor(logging.DEBUG)
+	IsDebug = func() bool {
+		return log.IsEnabledFor(logging.DEBUG)
+	}
 )

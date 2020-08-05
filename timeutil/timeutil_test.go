@@ -7,7 +7,7 @@ import (
 )
 
 func TestFormatTime(t *testing.T) {
-	fmt.Println(time.Now().Format( "20060102"))
+	fmt.Println(time.Now().Format("20060102"))
 }
 
 func TestFormatLenTime(t *testing.T) {
@@ -19,7 +19,6 @@ func TestFormatLenTime(t *testing.T) {
 	fmt.Println(FmtDatetimeMString(time.Now()))
 
 }
-
 
 func TestFmtCstTime(t *testing.T) {
 	fmt.Println(FmtCstDatetime(time.Now()))

@@ -9,8 +9,8 @@ import (
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/labstack/echo/v4"
 
-	"github.com/ca17/go-common/conf"
 	"github.com/ca17/go-common/common"
+	"github.com/ca17/go-common/conf"
 )
 
 type RestResult struct {

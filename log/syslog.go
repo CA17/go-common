@@ -24,6 +24,7 @@ func NewSyslogBackend(prefix string, syslogaddr string, priority syslog.Priority
 	}
 	return &SyslogBackend{w}, err
 }
+
 // NewSyslogBackendPriority is the same as NewSyslogBackend, but with custom
 // syslog priority, like syslog.LOG_LOCAL3|syslog.LOG_DEBUG etc.
 func NewSyslogBackendPriority(prefix string, priority syslog.Priority) (b *SyslogBackend, err error) {

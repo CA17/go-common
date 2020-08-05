@@ -29,8 +29,8 @@ type DBConfig struct {
 }
 
 type GrpcConfig struct {
-	Host    string `yaml:"host"`
-	Port    int    `yaml:"port"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
 	CertFile string `yaml:"cert_file"`
 }
 

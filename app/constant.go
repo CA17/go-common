@@ -1,6 +1,6 @@
 package app
 
 const (
-	AuthSkipUri      = "AuthSkipUri"
+	AuthSkipUri    = "AuthSkipUri"
 	AuthSkipPrefix = "AuthSkipPrefix"
 )

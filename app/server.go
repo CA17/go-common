@@ -8,9 +8,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	"github.com/ca17/go-common/common"
 	"github.com/ca17/go-common/conf"
 	"github.com/ca17/go-common/log"
-	"github.com/ca17/go-common/common"
 )
 
 func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...WebHandler) error {
@@ -29,7 +29,7 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 		AllowOrigins: strings.Split(webcfg.AllowOrigins, ","),
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		// AllowHeaders: []string{"Content-Type"},
-		AllowCredentials:true,
+		AllowCredentials: true,
 	}))
 	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey: []byte(webcfg.Secret),
@@ -44,7 +44,7 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 			skipPrefix, ok := appContext.Get(AuthSkipPrefix)
 			if ok {
 				for _, p := range skipPrefix.([]string) {
-					if strings.HasPrefix(c.Request().RequestURI, p){
+					if strings.HasPrefix(c.Request().RequestURI, p) {
 						return true
 					}
 				}
@@ -59,8 +59,6 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 	for _, webHandler := range handler {
 		webHandler.InitRouter(webctx, group)
 	}
-
-
 
 	e.HideBanner = true
 	e.Debug = webcfg.Debug

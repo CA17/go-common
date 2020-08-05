@@ -29,4 +29,3 @@ func ServerRecover(debug bool) echo.MiddlewareFunc {
 		}
 	}
 }
-

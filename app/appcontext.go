@@ -62,7 +62,6 @@ func (m *AppContext) Get(key string) (interface{}, bool) {
 	return m.Context.Get(key)
 }
 
-
 func NewAppContext(context ContextManager) *AppContext {
 	return &AppContext{Context: context}
 }
@@ -127,6 +126,8 @@ type CrudQuery struct {
 	Eq         sq.Eq
 	LtOrEq     sq.LtOrEq
 	GtOrEq     sq.GtOrEq
+	OrderBy    string
+	Limit      uint64
 	Wheres     []string
 	Pager      bool
 	PageSize   uint64
@@ -233,7 +234,7 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 			}
 		}
 
-		if cq.LikeValue != "" && cq.LikeNames != nil{
+		if cq.LikeValue != "" && cq.LikeNames != nil {
 			like := fmt.Sprintf("%s%%", cq.LikeValue)
 			ormap := sq.Or{}
 			for _, name := range cq.LikeNames {
@@ -254,6 +255,10 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 			b = b.Where(cq.GtOrEq)
 		}
 
+		if cq.OrderBy != "" {
+			b = b.OrderBy(cq.OrderBy)
+		}
+
 		return b
 	}
 	bs := sq.Select(cq.Culumns...).From(cq.Table)
@@ -263,11 +268,15 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 	if cq.Pager {
 		cq.ResultPage = EmptyPageResult
 		bs = bs.Offset(cq.PagePos).Limit(cq.PageSize)
+	} else {
+		if cq.Limit > 0 {
+			bs = bs.Limit(cq.Limit)
+		}
 	}
 
 	// 查询数据
 	sql, args, _ := bs.ToSql()
-	if log.IsDebug {
+	if log.IsDebug() {
 		log.Debug(sql, args)
 	}
 	err := m.Context.DBPool().Select(cq.ResultRef, sql, args...)
@@ -283,7 +292,7 @@ func (m *AppContext) DBQuery(cq *CrudQuery) error {
 			bc := sq.Select("count(*)").From(cq.Table)
 			bc = filterBuilder(bc)
 			sqlbc, argsbc, _ := bc.ToSql()
-			if log.IsDebug {
+			if log.IsDebug() {
 				log.Debug(sql, args)
 			}
 			err := m.Context.DBPool().Get(&total, sqlbc, argsbc...)
@@ -315,7 +324,7 @@ func (m *AppContext) DBInsertWithTx(tx *sql.Tx, table string, vals map[string]in
 		log.Error(err)
 		return err
 	}
-	if log.IsDebug {
+	if log.IsDebug() {
 		log.Debug(sql, args)
 	}
 	if tx != nil {
@@ -352,7 +361,7 @@ func (m *AppContext) DBAdd(ca *CrudAdd) error {
 			return err
 		}
 
-		if log.IsDebug {
+		if log.IsDebug() {
 			log.Debug(sql, args)
 		}
 
@@ -398,7 +407,7 @@ func (m *AppContext) DBUpdate(cu *CrudUpdate) error {
 		b = b.Where(cu.GtOrEq)
 	}
 	sql, args, _ := b.ToSql()
-	if log.IsDebug {
+	if log.IsDebug() {
 		log.Debug(sql, args)
 	}
 	var err error

@@ -13,13 +13,13 @@ const (
 )
 
 type QcloudSms struct {
-	SecretId string
-	SecretKey string
-	SmsSign string
-	Region string
-	Appid string
+	SecretId   string
+	SecretKey  string
+	SmsSign    string
+	Region     string
+	Appid      string
 	VcodeTplId string
-	Client *sms.Client
+	Client     *sms.Client
 }
 
 func NewQcloudSms(secretId string, secretKey string, smsSign string, region string, appid string) *QcloudSms {
@@ -89,7 +89,7 @@ func (qs *QcloudSms) SendVcode(vcode string, number string, tplid string) (*sms.
 	request.TemplateID = common.StringPtr(tplid)
 	/* 下发手机号码，采用 e.164 标准，+[国家或地区码][手机号]
 	 * 示例如：+8613711112222， 其中前面有一个+号 ，86为国家码，13711112222为手机号，最多不要超过200个手机号*/
-	request.PhoneNumberSet = common.StringPtrs([]string{"+86"+number})
+	request.PhoneNumberSet = common.StringPtrs([]string{"+86" + number})
 	// 通过client对象调用想要访问的接口，需要传入请求对象
 	response, err := qs.Client.SendSms(request)
 	// 处理异常
