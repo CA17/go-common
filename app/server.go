@@ -11,15 +11,16 @@ import (
 	"github.com/ca17/go-common/common"
 	"github.com/ca17/go-common/conf"
 	"github.com/ca17/go-common/log"
+	"github.com/ca17/go-common/tpl"
 )
 
-func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...WebHandler) error {
+func StartWebserver(config conf.AppConfig, appContext *AppContext, tplrender *tpl.CommonTemplate, handler ...WebHandler) error {
 	webcfg := config.GetWebConfig()
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
-	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
-		Level: 5,
-	}))
+	// e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+	// 	Level: 5,
+	// }))
 	e.Use(ServerRecover(config.GetWebConfig().Debug))
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "[${time_rfc3339}] ${remote_ip} ${method} ${uri} ${protocol} ${status} ${id} ${user_agent} ${error}\n",
@@ -59,7 +60,7 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, handler ...We
 	for _, webHandler := range handler {
 		webHandler.InitRouter(webctx, group)
 	}
-
+	e.Renderer = tplrender
 	e.HideBanner = true
 	e.Debug = webcfg.Debug
 	log.Info("try start tls server")

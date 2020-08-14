@@ -21,6 +21,7 @@ import (
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/pkg/errors"
+	"github.com/shopspring/decimal"
 )
 
 var (
@@ -315,3 +316,57 @@ func FmtSecondDesc(secs int64) string {
 	return fmt.Sprintf("%d秒", secs)
 }
 
+func IsNumber(val interface{}) bool {
+	switch v := val.(type) {
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
+		return true
+	case []byte:
+		_, err := strconv.ParseFloat(string(v), 32)
+		return err == nil
+	case string:
+		_, err := strconv.ParseFloat(v, 32)
+		return err == nil
+	case []rune:
+		_, err := strconv.ParseFloat(string(v), 32)
+		return err == nil
+	default:
+		return false
+	}
+}
+
+func IsInt(val interface{}) bool {
+	switch v := val.(type) {
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		return true
+	case []byte:
+		_, err := strconv.ParseInt(string(v), 10,64)
+		return err == nil
+	case string:
+		_, err := strconv.ParseInt(v, 10,64)
+		return err == nil
+	case []rune:
+		_, err := strconv.ParseInt(string(v), 10,64)
+		return err == nil
+	default:
+		return false
+	}
+}
+
+
+func YuanToFen(yuan string) (int64, error) {
+	dec, err := decimal.NewFromString(yuan)
+	if err != nil {
+		return 0, err
+	}
+	dec = dec.Round(2)
+	dec2 := decimal.NewFromInt(100)
+	dec3 := dec.Mul(dec2)
+	return dec3.IntPart(), nil
+}
+
+func Fen2Yuan(fen int64) string {
+	dec1 := decimal.NewFromInt(fen)
+	dec2 := decimal.NewFromInt(100)
+	dec3 := dec1.DivRound(dec2, 2)
+	return dec3.String()
+}

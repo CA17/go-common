@@ -40,6 +40,13 @@ type WebForm struct {
 	Gets     url.Values        `json:"-" form:"-" query:"-"`
 	Params   map[string]string `json:"-" form:"-" query:"-"`
 }
+func EmptyWebForm() *WebForm {
+	v := &WebForm{}
+	v.Params = make(map[string]string,0)
+	v.Posts = make(url.Values,0)
+	v.Gets = make(url.Values,0)
+	return v
+}
 
 func NewWebForm(c echo.Context) *WebForm {
 	v := &WebForm{}
