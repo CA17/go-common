@@ -99,22 +99,23 @@ func UUID() string {
 	return fmt.Sprintf("%x-%x-%x-%x-%x-%x", unix32bits, buff[0:2], buff[2:4], buff[4:6], buff[6:8], buff[8:])
 }
 
+var int64node, _ = snowflake.NewNode(1000)
 // 生成  int64
 func UUIDint64() int64 {
-	node, err := snowflake.NewNode(1000)
 	if err != nil {
 		fmt.Println(err)
 		return 0
 	}
-	return node.Generate().Int64()
+	return int64node.Generate().Int64()
 }
 
+var b32node, err = snowflake.NewNode(mrand.Int63n(64))
+
 func UUIDBase32() (string, error) {
-	node, err := snowflake.NewNode(mrand.Int63n(64))
 	if err != nil {
 		return "", err
 	}
-	id := node.Generate()
+	id := b32node.Generate()
 	// Print out the ID in a few different ways.
 	return id.Base32(), nil
 }
@@ -339,19 +340,18 @@ func IsInt(val interface{}) bool {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return true
 	case []byte:
-		_, err := strconv.ParseInt(string(v), 10,64)
+		_, err := strconv.ParseInt(string(v), 10, 64)
 		return err == nil
 	case string:
-		_, err := strconv.ParseInt(v, 10,64)
+		_, err := strconv.ParseInt(v, 10, 64)
 		return err == nil
 	case []rune:
-		_, err := strconv.ParseInt(string(v), 10,64)
+		_, err := strconv.ParseInt(string(v), 10, 64)
 		return err == nil
 	default:
 		return false
 	}
 }
-
 
 func YuanToFen(yuan string) (int64, error) {
 	dec, err := decimal.NewFromString(yuan)
@@ -370,3 +370,14 @@ func Fen2Yuan(fen int64) string {
 	dec3 := dec1.DivRound(dec2, 2)
 	return dec3.String()
 }
+
+
+
+func Sha256HashWithSalt(src string, salt string) string {
+	h := sha256_.New()
+	h.Write([]byte(src))
+	h.Write([]byte(salt))
+	bs := h.Sum(nil)
+	return fmt.Sprintf("%x", bs)
+}
+

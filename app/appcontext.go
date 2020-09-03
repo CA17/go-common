@@ -1,16 +1,20 @@
 package app
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/ca17/go-common/common"
 	"github.com/ca17/go-common/conf"
@@ -41,9 +45,24 @@ func GetGrpcConn(config *conf.GrpcConfig) (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
+func GetMongodbClient(config conf.MongodbConfig) (*mongo.Client, error) {
+	client, err := mongo.NewClient(options.Client().ApplyURI(config.Url))
+	if err != nil {
+		return nil, err
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+
 // 上下文管理， 用户管理全局对象
 type ContextManager interface {
 	DBPool() *sqlx.DB
+	MongoDb() *mongo.Client
 	GrpConn() *grpc.ClientConn
 	GetAppConfig() interface{}
 	Get(key string) (interface{}, bool)

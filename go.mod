@@ -11,7 +11,6 @@ require (
 	github.com/go-playground/validator/v10 v10.2.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/kr/pretty v0.1.0 // indirect
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/labstack/gommon v0.3.0
 	github.com/mitchellh/mapstructure v1.3.0
@@ -19,6 +18,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/shopspring/decimal v1.2.0
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.172+incompatible
+	go.mongodb.org/mongo-driver v1.4.0
 	google.golang.org/grpc v1.29.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0

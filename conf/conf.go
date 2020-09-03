@@ -40,11 +40,19 @@ type RedisConfig struct {
 	DB       int    `yaml:"db"`
 }
 
+
+type MongodbConfig struct {
+	Url    string `yaml:"url"`
+	User   string `yaml:"user"`
+	Passwd string `yaml:"passwd"`
+}
+
 type AppConfig interface {
 	GetWebConfig() *WebConfig
 	GetDBConfig() *DBConfig
 	GetRedisConfig() *RedisConfig
 	GetGrpcConfig() *GrpcConfig
+	GetMongodbConfig() *MongodbConfig
 	GetAppName() string
 	GetSyslogAddr() string
 	IsDev() bool

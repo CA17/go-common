@@ -38,7 +38,7 @@ func (grp *HighChartLineSeriesGroup) GetData() []HighChartLineSeries {
 		result = append(result, *series)
 	}
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].Name > result[j].Name
+		return result[i].Name < result[j].Name
 	})
 	return result
 }

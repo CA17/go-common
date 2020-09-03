@@ -18,6 +18,7 @@ Description={{appname}}
 After=network.target
 
 [Service]
+Environment=GODEBUG=x509ignoreCN=0
 LimitNOFILE=65535
 LimitNPROC=65535
 User={{user}}
