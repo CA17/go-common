@@ -64,7 +64,7 @@ type ContextManager interface {
 	DBPool() *sqlx.DB
 	MongoDb() *mongo.Client
 	GrpConn() *grpc.ClientConn
-	GetAppConfig() interface{}
+	GetAppConfig() conf.AppConfig
 	Get(key string) (interface{}, bool)
 	Set(key string, val interface{})
 }
