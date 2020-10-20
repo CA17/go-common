@@ -26,6 +26,7 @@ type DBConfig struct {
 	Name    string `yaml:"name"`
 	User    string `yaml:"user"`
 	Passwd  string `yaml:"passwd"`
+	Debug  bool `yaml:"debug"`
 }
 
 type GrpcConfig struct {

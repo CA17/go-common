@@ -23,7 +23,7 @@ func StartWebserver(config conf.AppConfig, appContext *AppContext, tplrender *tp
 	// }))
 	e.Use(ServerRecover(config.GetWebConfig().Debug))
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "[${time_rfc3339}] ${remote_ip} ${method} ${uri} ${protocol} ${status} ${id} ${user_agent} ${error}\n",
+		Format: config.GetAppName()+" ${time_rfc3339} ${remote_ip} ${method} ${uri} ${protocol} ${status} ${id} ${user_agent} ${error}\n",
 		Output: os.Stdout,
 	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

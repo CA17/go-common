@@ -381,3 +381,20 @@ func Sha256HashWithSalt(src string, salt string) string {
 	return fmt.Sprintf("%x", bs)
 }
 
+func SetEnvValue(name string, f func(v string)) {
+	var evalue = os.Getenv(name)
+	if evalue != "" {
+		f(evalue)
+	}
+}
+func SetEnvInt64Value(name string, f func(v int64)) {
+	var evalue = os.Getenv(name)
+	if evalue == "" {
+		return
+	}
+
+	p, err := strconv.ParseInt(evalue, 10, 64)
+	if err == nil {
+		f(p)
+	}
+}
